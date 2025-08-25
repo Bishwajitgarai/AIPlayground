@@ -9,6 +9,7 @@ uvicorn = "*"
 pydantic-settings = "*"
 google-genai = "*"
 redis = "*"
+python-multipart = "*"
 
 [dev-packages]
 
