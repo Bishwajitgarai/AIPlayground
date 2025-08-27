@@ -6,4 +6,4 @@ safe_core=max(1,os.cpu_count())
 print(f"Ruuning Cpu Count will be {safe_core}")
 
 if __name__=="__main__":
-    uvicorn.run("app.app:app",host="0.0.0.0",port=5000,workers=safe_core)
+    uvicorn.run("app.app:app",host="0.0.0.0",port=10000,workers=safe_core)
