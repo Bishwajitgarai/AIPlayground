@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY:str
     
     GEMINI_CHAT_MODEL:str
+    GEMINI_LIVE_MODEL:str
 
 
     model_config=SettingsConfigDict(

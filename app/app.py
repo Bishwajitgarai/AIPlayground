@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.user import user_router
+from app.routes.wsconnect import ws_router
 
 
 app=FastAPI()
@@ -14,6 +15,7 @@ app.add_middleware(
 
 
 app.include_router(user_router, prefix="/api")
+app.include_router(ws_router, prefix="/api")
 
 @app.get("/")
 async def home():
