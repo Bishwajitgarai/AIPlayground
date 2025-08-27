@@ -6,8 +6,10 @@ from app.core.config import settings
 
 ws_router = APIRouter(tags=["Live list"], prefix="/ws")
 
-@ws_router.websocket("/ws/stream/chat/{meeting_id}/")
+@ws_router.websocket("/stream/chat/{meeting_id}/")
 async def receive_updates(websocket: WebSocket, meeting_id: str):
+    print(f"📡 WebSocket connection recived for meeting: {meeting_id}")
+
     await websocket.accept()
     print(f"📡 WebSocket connected for meeting: {meeting_id}")
     channel_id=f"channel:meeting:{meeting_id}"
@@ -26,7 +28,6 @@ async def receive_updates(websocket: WebSocket, meeting_id: str):
                 # Get message from Redis (sync call in thread)
                 message = await asyncio.to_thread(
                     pubsub.get_message,
-                    ignore_subscribe_messages=True,
                     timeout=1.0
                 )
                 if message and message["type"] == "message":
@@ -47,7 +48,7 @@ async def receive_updates(websocket: WebSocket, meeting_id: str):
             while connected:
                 # Receive message from WebSocket
                 message = await websocket.receive_json()
-                # print(f"📥 Received message from WebSocket: {message}")
+                print(f"📥 Received message from WebSocket: {message}")
                 
                 # Publish to Redis (sync call in thread)
                 if message:
@@ -81,9 +82,11 @@ async def receive_updates(websocket: WebSocket, meeting_id: str):
         print(f"✅ Cleaned up Redis connection for meeting: {meeting_id}")    
 
 
-@ws_router.websocket("/ws/stream/{meeting_id}/")
+@ws_router.websocket("/stream/{meeting_id}/")
 async def stream_audio(websocket: WebSocket, meeting_id: str):
     # Extract system_instruction from query param if available
+    print(f"🔌 WebSocket connection comes for meeting: {meeting_id}")
+
     query_params = websocket.query_params
     custom_instruction = query_params.get("system_instruction")
     default_system_instruction = """

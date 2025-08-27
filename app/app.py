@@ -10,12 +10,14 @@ app=FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"]
+    allow_origins=["*"],      # Allow all origins
+    allow_credentials=True,   # Allow cookies / auth headers
+    allow_methods=["*"],      # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],      # Allow all headers
 )
 
-
 app.include_router(user_router, prefix="/api")
-app.include_router(ws_router, prefix="/api")
+app.include_router(ws_router, prefix="/extension")
 
 @app.get("/")
 async def home():
