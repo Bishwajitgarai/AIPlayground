@@ -5,9 +5,13 @@ from app.routes.user import user_router
 from app.routes.wsconnect import ws_router
 from app.utils.token_verify import verify_token
 from app.utils.logger import log_requests
+from app.core.db import Base, engine, get_db
 
 
 app=FastAPI()
+
+# Create tables (for dev; in prod you should use Alembic)
+Base.metadata.create_all(bind=engine)
 
 
 app.add_middleware(

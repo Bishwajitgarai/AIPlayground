@@ -10,6 +10,10 @@ pydantic-settings = "*"
 google-genai = "*"
 redis = "*"
 python-multipart = "*"
+sqlalchemy = "*"
+pymysql = "*"
+psycopg2-binary = "*"
+alembic = "*"
 
 [dev-packages]
 

@@ -1,10 +1,48 @@
-# Environment files
+# ----------------------------
+# Environment & Config
+# ----------------------------
 .env
+*.env
 
-# Pipenv lock file (optional, if you don't want it tracked)
+# ----------------------------
+# Python
+# ----------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.egg-info/
+.eggs/
+.venv/
+venv/
+ENV/
+
+# ----------------------------
+# Pipenv / Poetry / Virtualenv
+# ----------------------------
 Pipfile.lock
 *Pipfile.lock
+poetry.lock
 
-# All log files
+# ----------------------------
+# Logs
+# ----------------------------
 *.log
 logs/
+log/
+
+# ----------------------------
+# Database files
+# ----------------------------
+*.db
+*.sqlite3
+
+# ----------------------------
+# Alembic / Mako cache
+# ----------------------------
+alembic/versions/*.pyc
+alembic/versions/*.py
+alembic/versions/__pycache__/
+alembic/*.mako.py
+

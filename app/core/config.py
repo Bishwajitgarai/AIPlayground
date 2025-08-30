@@ -12,6 +12,13 @@ class Settings(BaseSettings):
     GEMINI_CHAT_MODEL:str
     GEMINI_LIVE_MODEL:str
 
+    DB_NAME:str
+    DB_PASSWORD:str
+    DB_HOST:str
+    DB_PORT:str
+    DB_TYPE:str
+    DB_USER:str
+
 
 
     model_config=SettingsConfigDict(
