@@ -42,6 +42,6 @@ log/
 # Alembic / Mako cache
 # ----------------------------
 alembic/versions/*.pyc
-alembic/versions/*.py
+# alembic/versions/*.py
 alembic/versions/__pycache__/
 
