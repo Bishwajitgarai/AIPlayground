@@ -44,5 +44,5 @@ log/
 alembic/versions/*.pyc
 alembic/versions/*.py
 alembic/versions/__pycache__/
-alembic/*.mako.py
+alembic/*.py.mako
 
