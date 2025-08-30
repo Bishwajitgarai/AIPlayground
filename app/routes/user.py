@@ -29,8 +29,8 @@ async def get_query(query: str):
 
         if not response.candidates:
             return JSONResponse(
-                status_code=500,
-                content={"status_code": 500, "message": "No response from Gemini"},
+                status_code=400,
+                content={"status_code": 400, "message": "No response from Gemini"},
             )
 
         # Use instantiated objects.
@@ -38,8 +38,8 @@ async def get_query(query: str):
 
         
         return JSONResponse(
-            status_code=500,
-            content={"status_code": 500, "message": response_data.model_dump()},
+            status_code=200,
+            content={"status_code": 200, "message": response_data.model_dump()},
         )
 
     except Exception as e:
@@ -73,8 +73,8 @@ async def fileupload(file:UploadFile=File(...),query=Query(...)):
 
         if not response.candidates:
             return JSONResponse(
-                status_code=500,
-                content={"status_code": 500, "message": "No response from Gemini"},
+                status_code=400,
+                content={"status_code": 400, "message": "No response from Gemini"},
             )
 
         # Use instantiated objects.
@@ -82,8 +82,8 @@ async def fileupload(file:UploadFile=File(...),query=Query(...)):
 
         
         return JSONResponse(
-            status_code=500,
-            content={"status_code": 500, "message": response_data.model_dump()},
+            status_code=200,
+            content={"status_code": 200, "message": response_data.model_dump()},
         )
 
     except Exception as e:
