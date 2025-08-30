@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     GEMINI_LIVE_MODEL:str
 
 
+
     model_config=SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8"

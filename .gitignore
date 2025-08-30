@@ -1,2 +1,10 @@
+# Environment files
 .env
+
+# Pipenv lock file (optional, if you don't want it tracked)
 Pipfile.lock
+*Pipfile.lock
+
+# All log files
+*.log
+logs/
