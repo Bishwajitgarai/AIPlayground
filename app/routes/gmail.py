@@ -5,6 +5,13 @@ from app.services.gmail_client import GmailSender
 from app.core.config import settings
 import tempfile
 import os
+from sqlalchemy.orm import Session
+from app.core.db import get_db
+from fastapi import Depends
+from app.models.email_history import EmailHistory
+from app.utils.email_sending import can_send_email
+from datetime import datetime
+
 
 gmail_router = APIRouter(tags=["gmail"], prefix="/gmail")
 
@@ -41,6 +48,8 @@ async def send_gmail(
     x_gmail_token: Optional[str] = Header(None, alias="X-Gmail-Token"),
     gmail_user: Optional[str] = Header(None, alias="GMAIL-USER"),
     gmail_app_password: Optional[str] = Header(None, alias="GMAIL-APP-PASSWORD"),
+    db: Session = Depends(get_db),
+
 ):
     """
     Send an email using Gmail with optional subject, body, and attachments.
@@ -86,22 +95,42 @@ async def send_gmail(
 
         # Send email to each recipient
         sender = GmailSender(user, password)
-        for recipient in to_emails:
-            sender.send_mail(
-                to_email=recipient,
-                subject=subject,
-                body=body,
-                attachments=file_paths,
-            )
+        sent_recipients = []
+        skipped_recipients = []
+        unique_recipients = list({email.lower() for email in to_emails})
+
+        for recipient in unique_recipients:
+            if can_send_email(db, recipient):
+                sender.send_mail(
+                    to_email=recipient,
+                    subject=subject,
+                    body=body,
+                    attachments=file_paths,
+                )
+                # Save history
+                history = EmailHistory(
+                    from_email=user,
+                    recipient=recipient,
+                    subject=subject,
+                    sent_at=datetime.utcnow(),
+                )
+                db.add(history)
+                sent_recipients.append(recipient)
+            else:
+                skipped_recipients.append(recipient)
 
         # Cleanup only temp files
         for path in file_paths:
             if path != DEFAULT_CV_PATH and os.path.exists(path):
                 os.remove(path)
-
+        db.commit()
         return JSONResponse(
             status_code=200,
-            content={"status_code": 200, "message": "Email sent successfully"},
+            content={"status_code": 200, "status_code": 200,
+            "sent": sent_recipients,
+            "skipped": skipped_recipients,
+            "message": f"Sent {len(sent_recipients)} emails, skipped {len(skipped_recipients)}"
+            },
         )
 
     except Exception as e:

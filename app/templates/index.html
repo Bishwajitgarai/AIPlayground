@@ -208,7 +208,17 @@
         });
         if (response.ok) {
           result.className = "mb-4 p-3 rounded-lg text-sm bg-green-100 text-green-800";
-          result.textContent = "✅ Email sent successfully!";
+          const data = await response.json();
+          let msg = "✅ " + (data.message || "Email sent successfully!");
+          // If backend provided lists of sent/skipped emails
+          if (data.sent && data.sent.length > 0) {
+            msg += "\n\n📨 Sent to:\n- " + data.sent.join("\n- ");
+          }
+          if (data.skipped && data.skipped.length > 0) {
+            msg += "\n\n⏭️ Skipped (within 7 days):\n- " + data.skipped.join("\n- ");
+          }
+
+          result.textContent = msg;
         } else {
           const error = await response.json();
           result.className = "mb-4 p-3 rounded-lg text-sm bg-red-100 text-red-800";
