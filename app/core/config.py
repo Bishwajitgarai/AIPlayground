@@ -8,7 +8,6 @@ class Settings(BaseSettings):
     REDIS_PASSWORD:str
 
     GEMINI_API_KEY:str
-    
     GEMINI_CHAT_MODEL:str
     GEMINI_LIVE_MODEL:str
 
@@ -18,6 +17,10 @@ class Settings(BaseSettings):
     DB_PORT:str
     DB_TYPE:str
     DB_USER:str
+
+    GMAIL_USER:str
+    GMAIL_APP_PASSWORD:str
+    GMAIL_APP_TOKEN:str
 
 
 

@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.user import user_router
 from app.routes.wsconnect import ws_router
+from app.routes.gmail import gmail_router
 from app.utils.token_verify import verify_token
 from app.utils.logger import log_requests
 from app.core.db import Base, engine, get_db
@@ -27,6 +28,7 @@ app.middleware("http")(log_requests)
 
 
 app.include_router(user_router, prefix="/api")
+app.include_router(gmail_router, prefix="/api")
 app.include_router(ws_router, prefix="/extension")
 
 @app.get("/")

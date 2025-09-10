@@ -6,7 +6,7 @@ from google.genai.types import Part, GenerateContentConfig
 
 
 
-user_router = APIRouter(tags=["User list"], prefix="/user")
+user_router = APIRouter(tags=["User"], prefix="/user")
 
 @user_router.get("/{query}")
 async def get_query(query: str):
