@@ -1,5 +1,6 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI,Request
+from fastapi.responses import JSONResponse,HTMLResponse
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.user import user_router
 from app.routes.wsconnect import ws_router
@@ -25,14 +26,20 @@ app.add_middleware(
 
 app.middleware("http")(verify_token)
 app.middleware("http")(log_requests)
+templates = Jinja2Templates(directory="app/templates")
 
 
 app.include_router(user_router, prefix="/api")
 app.include_router(gmail_router, prefix="/api")
 app.include_router(ws_router, prefix="/extension")
 
-@app.get("/")
-async def home():
-    return JSONResponse({
-        "success":True,"message":"Running..."
-    })
+# @app.get("/")
+# async def home():
+#     return JSONResponse({
+#         "success":True,"message":"Running..."
+#     })
+
+# Serve index.html at root
+@app.get("/", response_class=HTMLResponse)
+async def read_index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})

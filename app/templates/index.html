@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Email</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-2xl">
+    <h1 class="text-3xl font-extrabold mb-6 text-gray-900 text-center">📧 Send Email</h1>
+
+    <!-- Result Message -->
+    <div id="result" class="hidden mb-4 p-3 rounded-lg text-sm"></div>
+
+    <form id="emailForm" enctype="multipart/form-data" class="space-y-6">
+      <!-- Auth Mode Switch -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">Authentication Mode</label>
+        <select id="authMode" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+          <option value="token">Use Token</option>
+          <option value="credentials">Use Gmail User + App Password</option>
+        </select>
+      </div>
+
+      <!-- Gmail Token -->
+      <div id="tokenSection">
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Gmail Token</label>
+        <input type="text" id="tokenInput" placeholder="Enter Gmail API Token"
+               class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+      </div>
+
+      <!-- Gmail Credentials -->
+      <div id="credentialsSection" class="hidden space-y-3">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Gmail User</label>
+          <input type="email" id="userInput" placeholder="your_email@gmail.com"
+                 class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">App Password</label>
+          <input type="password" id="passwordInput" placeholder="App password"
+                 class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+        </div>
+      </div>
+
+      <!-- To Emails -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">To Emails</label>
+        <div id="emailsContainer" class="space-y-2">
+          <div class="flex gap-2">
+            <input type="email" name="to_emails" placeholder="example@gmail.com"
+                   class="email-input flex-1 rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border" required>
+          </div>
+        </div>
+        <button type="button" id="addEmailBtn"
+                class="mt-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 text-sm font-medium transition">
+          + Add another email
+        </button>
+      </div>
+
+      <!-- Subject -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Subject</label>
+        <input type="text" name="subject" placeholder="Enter subject"
+               class="optional-input w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border">
+      </div>
+
+      <!-- Body -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Body</label>
+        <textarea name="body" rows="4" placeholder="Write your message..."
+                  class="optional-input w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border"></textarea>
+      </div>
+
+      <!-- Attachments -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Attachments</label>
+        <input type="file" name="attachments" multiple
+               class="optional-input block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none">
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-center">
+        <button type="submit" id="submitBtn"
+                class="px-6 py-2 bg-indigo-600 text-white font-medium rounded-xl shadow hover:bg-indigo-700 transition flex items-center gap-2">
+          <span id="btnText">Send</span>
+          <svg id="loadingSpinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Switch auth mode UI
+    document.getElementById("authMode").addEventListener("change", (e) => {
+      const tokenSection = document.getElementById("tokenSection");
+      const credentialsSection = document.getElementById("credentialsSection");
+      if (e.target.value === "token") {
+        tokenSection.classList.remove("hidden");
+        credentialsSection.classList.add("hidden");
+      } else {
+        tokenSection.classList.add("hidden");
+        credentialsSection.classList.remove("hidden");
+      }
+    });
+
+    // Validate email
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    // Add/remove email inputs
+    document.getElementById("addEmailBtn").addEventListener("click", () => {
+      const container = document.getElementById("emailsContainer");
+      const lastInput = container.querySelector("input:last-of-type");
+      if (!lastInput.value || !isValidEmail(lastInput.value)) {
+        alert("Please enter a valid email before adding another.");
+        lastInput.focus();
+        return;
+      }
+      const wrapper = document.createElement("div");
+      wrapper.className = "flex gap-2";
+      const input = document.createElement("input");
+      input.type = "email";
+      input.name = "to_emails";
+      input.placeholder = "example@gmail.com";
+      input.required = true;
+      input.className = "email-input flex-1 rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border";
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.textContent = "✖";
+      removeBtn.className = "px-2 text-red-500 hover:text-red-700 font-bold";
+      removeBtn.onclick = () => wrapper.remove();
+      wrapper.appendChild(input);
+      wrapper.appendChild(removeBtn);
+      container.appendChild(wrapper);
+    });
+
+    // Submit with fetch
+    document.getElementById("emailForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const authMode = document.getElementById("authMode").value;
+      const formData = new FormData();
+      const result = document.getElementById("result");
+      const btnText = document.getElementById("btnText");
+      const spinner = document.getElementById("loadingSpinner");
+
+      result.classList.add("hidden");
+
+      // Emails
+      const emailInputs = document.querySelectorAll(".email-input");
+      emailInputs.forEach((input) => {
+        if (input.value && isValidEmail(input.value)) {
+          formData.append("to_emails", input.value);
+        }
+      });
+      if (!formData.has("to_emails")) {
+        alert("At least one valid email is required.");
+        return;
+      }
+
+      // Optional fields
+      document.querySelectorAll(".optional-input").forEach((input) => {
+        if (input.type === "file" && input.files.length > 0) {
+          for (let file of input.files) {
+            formData.append("attachments", file);
+          }
+        } else if (input.value.trim() !== "") {
+          formData.append(input.name, input.value.trim());
+        }
+      });
+
+      // Headers
+      let headers = {};
+      if (authMode === "token") {
+        const token = document.getElementById("tokenInput").value.trim();
+        if (!token) {
+          alert("Token is required.");
+          return;
+        }
+        headers["X-Gmail-Token"] = token;
+      } else {
+        const user = document.getElementById("userInput").value.trim();
+        const password = document.getElementById("passwordInput").value.trim();
+        if (!user || !password) {
+          alert("User and App Password are required.");
+          return;
+        }
+        headers["GMAIL-USER"] = user;
+        headers["GMAIL-APP-PASSWORD"] = password;
+      }
+
+      // Show loading
+      btnText.textContent = "Sending...";
+      spinner.classList.remove("hidden");
+
+      try {
+        const response = await fetch("/api/gmail/send", {
+          method: "POST",
+          headers,
+          body: formData,
+        });
+        if (response.ok) {
+          result.className = "mb-4 p-3 rounded-lg text-sm bg-green-100 text-green-800";
+          result.textContent = "✅ Email sent successfully!";
+        } else {
+          const error = await response.json();
+          result.className = "mb-4 p-3 rounded-lg text-sm bg-red-100 text-red-800";
+          result.textContent = "❌ Failed: " + (error.detail || response.statusText);
+        }
+        result.classList.remove("hidden");
+      } catch (err) {
+        result.className = "mb-4 p-3 rounded-lg text-sm bg-red-100 text-red-800";
+        result.textContent = "❌ Error: " + err.message;
+        result.classList.remove("hidden");
+      } finally {
+        btnText.textContent = "Send";
+        spinner.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+</html>

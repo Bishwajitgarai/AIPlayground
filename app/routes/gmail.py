@@ -38,17 +38,30 @@ async def send_gmail(
     subject: Optional[str] = Form(None, description="Email subject"),
     body: Optional[str] = Form(None, description="Email body"),
     attachments: Optional[List[UploadFile]] = None,
-    x_gmail_token: str = Header(..., alias="X-Gmail-Token"),
+    x_gmail_token: Optional[str] = Header(None, alias="X-Gmail-Token"),
+    gmail_user: Optional[str] = Header(None, alias="GMAIL-USER"),
+    gmail_app_password: Optional[str] = Header(None, alias="GMAIL-APP-PASSWORD"),
 ):
     """
     Send an email using Gmail with optional subject, body, and attachments.
-    Defaults to CV if no attachments are provided.
-    Requires 'X-Gmail-Token' header for authentication.
+    - If X-Gmail-Token header is provided → validate and use default credentials.
+    - Otherwise → use GMAIL-USER and GMAIL-APP-PASSWORD headers directly.
     """
 
-    # ✅ Validate header token
-    if x_gmail_token != settings.GMAIL_APP_TOKEN:
-        raise HTTPException(status_code=401, detail="Invalid Gmail Header token")
+    # ✅ Authentication logic
+    if x_gmail_token:
+        if x_gmail_token != settings.GMAIL_APP_TOKEN:
+            raise HTTPException(status_code=401, detail="Invalid Gmail Header token")
+        user = settings.GMAIL_USER
+        password = settings.GMAIL_APP_PASSWORD
+    else:
+        if not gmail_user or not gmail_app_password:
+            raise HTTPException(
+                status_code=401,
+                detail="Missing Gmail authentication (provide either X-Gmail-Token or GMAIL-USER + GMAIL-APP-PASSWORD headers)",
+            )
+        user = gmail_user
+        password = gmail_app_password
 
     try:
         file_paths = []
@@ -70,10 +83,9 @@ async def send_gmail(
         # Use defaults if not provided
         subject = subject or DEFAULT_SUBJECT
         body = body or DEFAULT_BODY
-        print(file_paths)
 
         # Send email to each recipient
-        sender = GmailSender(settings.GMAIL_USER, settings.GMAIL_APP_PASSWORD)
+        sender = GmailSender(user, password)
         for recipient in to_emails:
             sender.send_mail(
                 to_email=recipient,
